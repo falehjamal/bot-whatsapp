@@ -1,0 +1,37 @@
+{
+  "name": "bot-whatsapp",
+  "version": "1.0.0",
+  "author": "Ahmad Faleh Jamaluddin",
+  "main": "index.js",
+  "license": "ISC",
+  "description": "Bot WhatsApp menggunakan Baileys dan Node.js. Mendukung pengiriman pesan pribadi, broadcast, dan ke grup dengan login QR Code.",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "bot WhatsApp",
+    "Baileys WhatsApp bot",
+    "API WhatsApp",
+    "Node.js",
+    "Express.js",
+    "WhatsApp automation",
+    "pengirim pesan otomatis",
+    "bot WA Indonesia",
+    "WhatsApp group bot"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/falehjamal/bot-whatsapp"
+  },
+  "homepage": "https://github.com/falehjamal/bot-whatsapp#readme",
+  "bugs": {
+    "url": "https://github.com/falehjamal/bot-whatsapp/issues"
+  },
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.7.9",
+    "body-parser": "^1.20.3",
+    "express": "^4.21.1",
+    "qrcode-terminal": "^0.12.0"
+  }
+}
