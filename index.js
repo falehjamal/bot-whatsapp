@@ -1,7 +1,9 @@
-const { makeWASocket, DisconnectReason, useMultiFileAuthState } = require('@whiskeysockets/baileys');
-const express = require('express');
-const bodyParser = require('body-parser');
-const qrCode = require('qrcode-terminal');
+import { makeWASocket, DisconnectReason, useMultiFileAuthState, downloadMediaMessage } from '@whiskeysockets/baileys';
+import express from 'express';
+import bodyParser from 'body-parser';
+import qrCode from 'qrcode-terminal';
+import fs from 'fs';
+import { route } from './src/routes/route.js';
 
 const app = express();
 app.use(express.json());
@@ -36,79 +38,43 @@ const initializeBot = async () => {
 
     // Event handler untuk pesan masuk
     sock.ev.on('messages.upsert', async (messages) => {
-        messages = messages.messages[0]
-        console.log(messages)
+        const message = messages.messages[0];
+        console.log(message);
 
-        if (!messages.key.fromMe) {
-            const pesan = messages;
-            const { remoteJid: noWa, fromMe } = pesan.key;
-        
-            const textMessage = pesan.message?.conversation?.toLowerCase() || 
-                                pesan.message?.extendedTextMessage?.text?.toLowerCase() || "";
-        
-            await sock.readMessages([pesan.key]);
-        
+        if (!message.key.fromMe) {
+            const { remoteJid: noWa, fromMe } = message.key;
+            const textMessage =
+                message.message?.conversation?.toLowerCase() ||
+                message.message?.extendedTextMessage?.text?.toLowerCase() ||
+                "";
+    
+            await sock.readMessages([message.key]); // Tandai pesan sebagai dibaca
+    
             if (!fromMe) {
                 let balasan;
-        
+    
+                // Respon otomatis berdasarkan teks
                 if (textMessage === "ping") {
                     balasan = "Pong";
                 } else if (textMessage === "id group") {
                     balasan = `ID Grup ini: ${noWa}`;
                 }
-        
+    
                 if (balasan) {
-                    await sock.sendMessage(noWa, { text: balasan }, { quoted: pesan });
-                }else{
-                    await sock.sendMessage(noWa, { text: textMessage }, { quoted: pesan });
+                    await sock.sendMessage(noWa, { text: balasan }, { quoted: message });
+                } else {
+                    await sock.sendMessage(noWa, { text: "Format tidak dikenali." }, { quoted: message });
                 }
             }
         }
-        
-        
     });
 };
 
 // Inisialisasi bot
 initializeBot();
 
-// Endpoint untuk mengirim pesan pribadi
-app.post('/send-private', async (req, res) => {
-    const { number, message } = req.body;
-    try {
-        const jid = `${number}@s.whatsapp.net`;
-        await sock.sendMessage(jid, { text: message });
-        res.status(200).json({ status: 'success', message });
-    } catch (err) {
-        res.status(500).json({ status: 'error', error: err.message });
-    }
-});
+app.use('/',route);
 
-// Endpoint untuk broadcast
-app.post('/send-broadcast', async (req, res) => {
-    const { numbers, message } = req.body;
-    try {
-        for (const number of numbers) {
-            const jid = `${number}@s.whatsapp.net`;
-            await sock.sendMessage(jid, { text: message });
-        }
-        res.status(200).json({ status: 'success', message: 'Broadcast sent!' });
-    } catch (err) {
-        res.status(500).json({ status: 'error', error: err.message });
-    }
-});
-
-// Endpoint untuk mengirim pesan ke grup
-app.post('/send-group', async (req, res) => {
-    const { groupId, message } = req.body;
-    try {
-        const jid = `${groupId}@g.us`;
-        await sock.sendMessage(jid, { text: message });
-        res.status(200).json({ status: 'success', message });
-    } catch (err) {
-        res.status(500).json({ status: 'error', error: err.message });
-    }
-});
 
 // Start server Express
 const PORT = 3000;

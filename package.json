@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "author": "Ahmad Faleh Jamaluddin",
   "main": "index.js",
+  "type": "module",
   "license": "ISC",
   "description": "Bot WhatsApp menggunakan Baileys dan Node.js. Mendukung pengiriman pesan pribadi, broadcast, dan ke grup dengan login QR Code.",
   "scripts": {
