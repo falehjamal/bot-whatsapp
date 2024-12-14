@@ -4,21 +4,23 @@ import bodyParser from 'body-parser';
 import qrCode from 'qrcode-terminal';
 import fs from 'fs';
 import { route } from './src/routes/route.js';
+import { incomingMessage } from './src/controllers/IncomingMessage.js';
+import { setSock } from './src/utils/whatsapp.js';
 
 const app = express();
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
 // Inisialisasi session auth
-let sock;
 const initializeBot = async () => {
     const { state, saveCreds } = await useMultiFileAuthState('./auth');
-    sock = makeWASocket({
+    const newSock = makeWASocket({
         auth: state,
     });
 
+    setSock(newSock);
     // Event QR Code
-    sock.ev.on('connection.update', (update) => {
+    newSock.ev.on('connection.update', (update) => {
         const { connection, qr } = update;
         if (qr) {
             console.log('Scan QR Code below:');
@@ -34,45 +36,19 @@ const initializeBot = async () => {
     });
 
     // Simpan session credentials
-    sock.ev.on('creds.update', saveCreds);
+    newSock.ev.on('creds.update', saveCreds);
 
     // Event handler untuk pesan masuk
-    sock.ev.on('messages.upsert', async (messages) => {
+    newSock.ev.on('messages.upsert', async (messages) => {
         const message = messages.messages[0];
         console.log(message);
 
-        if (!message.key.fromMe) {
-            const { remoteJid: noWa, fromMe } = message.key;
-            const textMessage =
-                message.message?.conversation?.toLowerCase() ||
-                message.message?.extendedTextMessage?.text?.toLowerCase() ||
-                "";
-    
-            await sock.readMessages([message.key]); // Tandai pesan sebagai dibaca
-    
-            if (!fromMe) {
-                let balasan;
-    
-                // Respon otomatis berdasarkan teks
-                if (textMessage === "ping") {
-                    balasan = "Pong";
-                } else if (textMessage === "id group") {
-                    balasan = `ID Grup ini: ${noWa}`;
-                }
-    
-                if (balasan) {
-                    await sock.sendMessage(noWa, { text: balasan }, { quoted: message });
-                } else {
-                    await sock.sendMessage(noWa, { text: "Format tidak dikenali." }, { quoted: message });
-                }
-            }
-        }
+        await incomingMessage(newSock,message);
     });
 };
 
 // Inisialisasi bot
 initializeBot();
-
 app.use('/',route);
 
 

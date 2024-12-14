@@ -1,6 +1,10 @@
+import { getSock } from "../utils/whatsapp.js";
+
+
 export const message = async (req, res) => {
     const { number, message } = req.body;
     try {
+        let sock = getSock();
         const jid = `${number}@s.whatsapp.net`;
         await sock.sendMessage(jid, { text: message });
         res.status(200).json({ status: 'success', message });
