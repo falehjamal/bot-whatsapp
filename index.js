@@ -4,7 +4,7 @@ import bodyParser from 'body-parser';
 import qrCode from 'qrcode-terminal';
 import fs from 'fs';
 import { route } from './src/routes/route.js';
-import { incomingMessage } from './src/controllers/IncomingMessage.js';
+import { incomingMessage, bangau } from './src/controllers/incomingMessage.js';
 import { setSock } from './src/utils/whatsapp.js';
 
 const app = express();
@@ -14,13 +14,13 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // Inisialisasi session auth
 const initializeBot = async () => {
     const { state, saveCreds } = await useMultiFileAuthState('./auth');
-    const newSock = makeWASocket({
+    const sock = makeWASocket({
         auth: state,
     });
 
-    setSock(newSock);
+    setSock(sock);
     // Event QR Code
-    newSock.ev.on('connection.update', (update) => {
+    sock.ev.on('connection.update', (update) => {
         const { connection, qr } = update;
         if (qr) {
             console.log('Scan QR Code below:');
@@ -36,14 +36,15 @@ const initializeBot = async () => {
     });
 
     // Simpan session credentials
-    newSock.ev.on('creds.update', saveCreds);
+    sock.ev.on('creds.update', saveCreds);
 
     // Event handler untuk pesan masuk
-    newSock.ev.on('messages.upsert', async (messages) => {
+    sock.ev.on('messages.upsert', async (messages) => {
         const message = messages.messages[0];
         console.log(message);
 
-        await incomingMessage(newSock,message);
+        await incomingMessage(sock,message);
+        await bangau(sock,message);
     });
 };
 

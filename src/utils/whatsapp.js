@@ -4,8 +4,9 @@ export const setSock = (newSock) => {
 };
 
 export const getSock = () => {
-    if(!sock){
-        throw new Error('Whatsapp client is not initialized');
+    if (!sock) {
+        console.log('Whatsapp client is not initialized. Please initialize before using.');
+        return null;
     }
     
     return sock;
