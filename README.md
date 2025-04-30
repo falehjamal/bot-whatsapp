@@ -45,4 +45,45 @@ node index.js
 - Pastikan Redis server berjalan sebelum menjalankan aplikasi
 - Dashboard monitoring dapat diakses untuk melihat status antrian pesan
 
+
+
+#. Contoh CURL PHP 
 ---
+
+<?php
+
+$url = "http://127.0.0.1:3000/send-private";
+
+// Data yang akan dikirim
+$data = [
+    'number' => '6285281411550',
+    'message' => 'ini testing redis bot wa',
+];
+
+// Inisialisasi CURL
+$ch = curl_init($url);
+
+// Set opsi CURL
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data)); // kirim sebagai JSON
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'Content-Type: application/json',
+    'Content-Length: ' . strlen(json_encode($data))
+]);
+
+// Eksekusi CURL dan ambil responsenya
+$response = curl_exec($ch);
+
+// Cek error
+if (curl_errno($ch)) {
+    echo curl_error($ch);
+} else {
+    echo $response;
+}
+
+// Tutup CURL
+curl_close($ch);
+
+##
+
