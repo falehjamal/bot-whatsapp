@@ -47,9 +47,8 @@ node index.js
 
 
 
-#. Contoh CURL PHP 
----
-
+### Contoh CURL PHP 
+```bash
 <?php
 
 $url = "http://127.0.0.1:3000/send-private";
@@ -84,6 +83,4 @@ if (curl_errno($ch)) {
 
 // Tutup CURL
 curl_close($ch);
-
-##
-
+```
