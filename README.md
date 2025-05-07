@@ -61,27 +61,67 @@ Konfigurasi aplikasi kini lebih mudah menggunakan file `.env`.
 - Semua konfigurasi Redis & port Express diatur lewat `.env`.
 - Tidak perlu install package yang tidak digunakan, dependencies sudah minimal.
 
+<<<<<<< HEAD
 ## Contoh CURL PHP 
 ```php
 <?php
 $url = "http://127.0.0.1:3000/send-private";
+=======
+- Bot menggunakan sistem autentikasi multi-file yang disimpan di folder `auth/`
+- Pastikan Redis server berjalan sebelum menjalankan aplikasi
+- Dashboard monitoring dapat diakses untuk melihat status antrian pesan
+
+
+
+### Contoh CURL PHP 
+```bash
+<?php
+
+$url = "http://127.0.0.1:3000/send-private";
+
+// Data yang akan dikirim
+>>>>>>> 445b534c4c99223f9e1316aaa2ba6ac5a92611d3
 $data = [
     'number' => '6285281411550',
     'message' => 'ini testing redis bot wa',
 ];
+<<<<<<< HEAD
 $ch = curl_init($url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+=======
+
+// Inisialisasi CURL
+$ch = curl_init($url);
+
+// Set opsi CURL
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data)); // kirim sebagai JSON
+>>>>>>> 445b534c4c99223f9e1316aaa2ba6ac5a92611d3
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
     'Content-Type: application/json',
     'Content-Length: ' . strlen(json_encode($data))
 ]);
+<<<<<<< HEAD
 $response = curl_exec($ch);
+=======
+
+// Eksekusi CURL dan ambil responsenya
+$response = curl_exec($ch);
+
+// Cek error
+>>>>>>> 445b534c4c99223f9e1316aaa2ba6ac5a92611d3
 if (curl_errno($ch)) {
     echo curl_error($ch);
 } else {
     echo $response;
 }
+<<<<<<< HEAD
+=======
+
+// Tutup CURL
+>>>>>>> 445b534c4c99223f9e1316aaa2ba6ac5a92611d3
 curl_close($ch);
 ```
