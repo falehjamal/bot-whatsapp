@@ -1,48 +1,87 @@
 # Bot WhatsApp
 
-Bot WhatsApp yang dibangun menggunakan Node.js dan WhatsApp Web API (@whiskeysockets/baileys). Bot ini dilengkapi dengan sistem antrian pesan menggunakan BullMQ dan dashboard monitoring.
-
----
+Bot WhatsApp berbasis Node.js & Express menggunakan WhatsApp Web API (@whiskeysockets/baileys), BullMQ untuk antrian pesan, dan dashboard monitoring berbasis web.  
+Konfigurasi aplikasi kini lebih mudah menggunakan file `.env`.
 
 ## 📌 Fitur Utama
+- **Autentikasi WhatsApp**: Scan QR via web, status koneksi real-time
+- **Antrian Pesan**: BullMQ + Redis untuk pengiriman pesan asinkron
+- **Dashboard Monitoring**: Pantau antrian pesan di `/queue`
+- **Respon Otomatis**: Balasan otomatis untuk pesan tertentu
+- **Koneksi Otomatis**: Reconnect otomatis jika terputus
+- **Konfigurasi Mudah**: Semua setting Redis & port via `.env`
 
-- **Autentikasi WhatsApp**: Sistem autentikasi multi-file untuk menyimpan status koneksi
-- **Antrian Pesan**: Menggunakan BullMQ untuk mengelola pengiriman pesan secara asinkron
-- **Dashboard Monitoring**: Antarmuka web untuk memantau antrian pesan
-- **Respon Otomatis**: Sistem untuk menangani pesan masuk secara otomatis
-- **Koneksi Otomatis**: Sistem reconnecting otomatis saat koneksi terputus
-
-## 🛠 Teknologi yang Digunakan
-
-- Node.js
-- Express.js
-- @whiskeysockets/baileys (WhatsApp Web API)
-- BullMQ (Sistem Antrian)
+## 🛠 Teknologi
+- Node.js, Express.js
+- @whiskeysockets/baileys
+- BullMQ
 - Redis
-- QR Code Terminal
+- ioredis
+- dotenv
 
 ## 🚀 Cara Menjalankan
 
-1. Install dependencies:
-```bash
-npm install
-```
+1. **Clone repo & install dependencies**
+   ```bash
+   git clone https://github.com/falehjamal/bot-whatsapp.git
+   cd bot-whatsapp
+   npm install
+   ```
 
-2. Pastikan Redis server berjalan di localhost:6379
+2. **Buat file `.env` di root project:**
+   ```
+   REDIS_HOST=127.0.0.1
+   REDIS_PORT=6379
+   REDIS_PASSWORD=
+   PORT=3000
+   ```
 
-3. Jalankan aplikasi:
-```bash
-node index.js
-```
+3. **Pastikan Redis server berjalan**  
+   (Default: `127.0.0.1:6379`)
 
-4. Scan QR Code yang muncul di terminal untuk menghubungkan bot
+4. **Jalankan aplikasi**
+   ```bash
+   npm start
+   ```
+   Atau untuk mode development (auto-reload):
+   ```bash
+   npm run dev
+   ```
 
-5. Akses dashboard monitoring di `http://localhost:3000/dashboard`
+5. **Akses dashboard bot**
+   - Buka `http://localhost:3000` untuk scan QR & kontrol bot
+   - Buka `http://localhost:3000/queue` untuk monitoring antrian pesan
+
+6. **Logout & Scan Ulang**
+   - Klik tombol "Logout" di dashboard untuk disconnect & reset auth
+   - Scan ulang QR jika ingin login ulang
 
 ## 📝 Catatan
+- Folder `auth/` akan otomatis terhapus saat logout.
+- Semua konfigurasi Redis & port Express diatur lewat `.env`.
+- Tidak perlu install package yang tidak digunakan, dependencies sudah minimal.
 
-- Bot menggunakan sistem autentikasi multi-file yang disimpan di folder `auth/`
-- Pastikan Redis server berjalan sebelum menjalankan aplikasi
-- Dashboard monitoring dapat diakses untuk melihat status antrian pesan
-
----
+## Contoh CURL PHP 
+```php
+<?php
+$url = "http://127.0.0.1:3000/send-private";
+$data = [
+    'number' => '6285281411550',
+    'message' => 'ini testing redis bot wa',
+];
+$ch = curl_init($url);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'Content-Type: application/json',
+    'Content-Length: ' . strlen(json_encode($data))
+]);
+$response = curl_exec($ch);
+if (curl_errno($ch)) {
+    echo curl_error($ch);
+} else {
+    echo $response;
+}
+curl_close($ch);
+```

@@ -3,12 +3,26 @@ import {  addMessageJob } from '../queues/queue.js';
 
 export const message = async (req, res) => {
     const { number, message } = req.body;
-    const jid = `${number}@s.whatsapp.net`;
+
+    // Helper untuk normalisasi nomor
+    const normalizeNumber = (num) => {
+        if (num.startsWith('+')) {
+            num = num.slice(1);
+        }
+        if (num.startsWith('0')) {
+            num = '62' + num.slice(1);
+        }
+        return num;
+    };
+
+    const normalizedNumber = normalizeNumber(number);
+    const jid = `${normalizedNumber}@s.whatsapp.net`;
+
     try {
         await addMessageJob(jid, message);
-        res.status(200).json({ status: 'queued', message });
+        res.status(200).json({ status: 'queued', number: normalizedNumber, message });
     } catch (err) {
-        res.status(500).json({ status: 'error', error: err.message });
+        res.status(500).json({ status: 'error', number: normalizedNumber, error: err.message });
     }
 };
 

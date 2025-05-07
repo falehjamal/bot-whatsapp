@@ -1,10 +1,10 @@
 // src/queues/queue.js
 import { Queue } from 'bullmq';
-import { redisConfig } from '../config/redis.js';
+import redis from '../config/redis.js';
 
 // Queue untuk pengiriman pesan WhatsApp
 export const messageQueue = new Queue('whatsapp-message', {
-  connection: redisConfig,
+  connection: redis,
 });
 
 /**

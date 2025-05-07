@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WhatsApp Bot Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <style>
+    body {
+      background: #f0f2f5;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .container {
+      max-width: 500px;
+      margin: 50px auto;
+    }
+    .card {
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      border: none;
+      overflow: hidden;
+    }
+    .card-header {
+      background-color: #25D366;
+      color: white;
+      text-align: center;
+      padding: 20px;
+      border-bottom: none;
+    }
+    .card-header h3 {
+      margin: 0;
+      font-weight: 600;
+    }
+    .card-body {
+      padding: 30px;
+      text-align: center;
+    }
+    .status-badge {
+      padding: 8px 15px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 20px;
+      display: inline-block;
+    }
+    .status-disconnected {
+      background-color: #ffe5e5;
+      color: #ff4d4d;
+    }
+    .status-connected {
+      background-color: #e5ffe5;
+      color: #25D366;
+    }
+    .status-qr {
+      background-color: #e5f0ff;
+      color: #3385ff;
+    }
+    .qr-container {
+      margin: 20px auto;
+      width: 220px;
+      height: 220px;
+      background-color: white;
+      border-radius: 10px;
+      padding: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .qr-instruction {
+      margin-top: 15px;
+      color: #666;
+      font-size: 14px;
+    }
+    .btn {
+      border-radius: 25px;
+      padding: 10px 20px;
+      font-weight: 500;
+      margin-top: 15px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    .btn-primary {
+      background-color: #25D366;
+      border-color: #25D366;
+    }
+    .btn-primary:hover {
+      background-color: #1fb359;
+      border-color: #1fb359;
+    }
+    .btn-danger {
+      background-color: #ff4d4d;
+      border-color: #ff4d4d;
+    }
+    .btn-danger:hover {
+      background-color: #e60000;
+      border-color: #e60000;
+    }
+    .icon {
+      margin-right: 5px;
+    }
+    #animation {
+      margin: 20px 0;
+      font-size: 24px;
+      color: #25D366;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <div class="card-header">
+        <h3><i class="fab fa-whatsapp icon"></i> WhatsApp Bot Dashboard</h3>
+      </div>
+      <div class="card-body">
+        <div id="status-badge" class="status-badge status-disconnected">
+          <i class="fas fa-circle-exclamation icon"></i>
+          <span id="status-text">Menghubungkan...</span>
+        </div>
+        
+        <div id="content-area">
+          <!-- Dinamis berdasarkan status -->
+        </div>
+        
+        <div id="actions" class="mt-4">
+          <button id="scanBtn" class="btn btn-primary w-100 mb-2">
+            <i class="fas fa-qrcode icon"></i>Scan QR Code
+          </button>
+          <button id="logoutBtn" class="btn btn-danger w-100" style="display:none">
+            <i class="fas fa-sign-out-alt icon"></i>Logout
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      const $statusBadge = $('#status-badge');
+      const $statusText = $('#status-text');
+      const $contentArea = $('#content-area');
+      const $scanBtn = $('#scanBtn');
+      const $logoutBtn = $('#logoutBtn');
+      
+      function updateUI(status, qrData) {
+        // Update status badge
+        $statusBadge.removeClass('status-disconnected status-connected status-qr');
+        
+        // Clear content area
+        $contentArea.empty();
+        
+        if (status === 'connected') {
+          $statusBadge.addClass('status-connected');
+          $statusText.text('Terhubung');
+          
+          $contentArea.html(`
+            <div id="animation">
+              <i class="fas fa-check-circle"></i>
+            </div>
+            <p>WhatsApp Bot Anda sedang berjalan dan siap menerima pesan</p>
+          `);
+          
+          $scanBtn.hide();
+          $logoutBtn.show();
+        }
+        else if (status === 'qr') {
+          $statusBadge.addClass('status-qr');
+          $statusText.text('Menunggu scan QR');
+          
+          // Tambahkan container untuk QR code
+          $contentArea.html(`
+            <div class="qr-container">
+              <div id="qrcode"></div>
+            </div>
+            <p class="qr-instruction">
+              Buka WhatsApp di HP Anda<br>
+              Ketuk Menu (⋮) > WhatsApp Web > Pindai kode QR
+            </p>
+          `);
+          
+          // Render QR code dengan qrcode.js
+          if (qrData) {
+            new QRCode(document.getElementById("qrcode"), {
+              text: qrData,
+              width: 200,
+              height: 200,
+              colorDark: "#000000",
+              colorLight: "#ffffff",
+              correctLevel: QRCode.CorrectLevel.H
+            });
+          }
+          
+          $scanBtn.hide();
+          $logoutBtn.hide();
+        }
+        else { // disconnected
+          $statusBadge.addClass('status-disconnected');
+          $statusText.text('Terputus');
+          
+          $contentArea.html(`
+            <div id="animation">
+              <i class="fas fa-times-circle"></i>
+            </div>
+            <p>WhatsApp Bot Anda tidak terhubung. Silakan scan QR code untuk memulai.</p>
+          `);
+          
+          $scanBtn.show();
+          $logoutBtn.hide();
+        }
+      }
+      
+      function refreshStatus() {
+        $.ajax({
+          url: '/api/status',
+          method: 'GET',
+          success: function(data) {
+            const { connectionStatus, qrData } = data;
+            updateUI(connectionStatus, qrData);
+          },
+          error: function() {
+            // Fallback jika API error
+            updateUI('disconnected');
+          }
+        });
+      }
+      
+      // Event handlers
+      $scanBtn.click(function() {
+        $statusText.text('Memulai ulang bot...');
+        $.get('/rescan').always(refreshStatus);
+      });
+      
+      $logoutBtn.click(function() {
+        if (confirm('Yakin ingin logout dari WhatsApp Bot?')) {
+          $statusText.text('Logging out...');
+          $.get('/logout').always(refreshStatus);
+        }
+      });
+      
+      // Initial status check
+      refreshStatus();
+      
+      // Set interval to check status
+      setInterval(refreshStatus, 3000);
+    });
+  </script>
+</body>
+</html>

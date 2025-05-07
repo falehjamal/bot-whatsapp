@@ -21,11 +21,13 @@ export const incomingMessage = async (sock, message) => {
 
       // Tentukan balasan
       let balasan;
-      if (textMessage === 'ping') {
+      if (textMessage == 'ping') {
         balasan = 'Pong';
-      } else if (textMessage === 'nomor') {
+      } else if (textMessage == 'nomor') {
         balasan = `ID ini: ${noWa}`;
-      } 
+      } else{
+        balasan = 'Pesan tidak dikenal';
+      }
 
       if (balasan) {
         // Enqueue balasan ke queue pengiriman jika balasan ada

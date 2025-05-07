@@ -11,3 +11,15 @@ export const getSock = () => {
     
     return sock;
 }
+
+export const disconnectSock = async () => {
+    if (sock && sock.ws) {
+        try {
+            await sock.logout();
+            sock = null;
+            console.log('WhatsApp client disconnected.');
+        } catch (err) {
+            console.error('Error disconnecting WhatsApp client:', err);
+        }
+    }
+};
